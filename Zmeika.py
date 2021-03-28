@@ -1,5 +1,6 @@
 import pygame as pg
 import random as rnd
+import os
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -13,21 +14,23 @@ HEIGHT = 600
 #Кадры в секунду
 FPS = 60
 
+IMG_HERO = os.path.join('img', 'hero.png') 
+IMG_APPLE = os.path.join('img', 'apple.png')
+
 
 #----------------
-class Player(pg.sprite.Sprite):
-    def __init__(self, goto):
+class Obj(pg.sprite.Sprite):
+    def __init__(self, goto, size_1, size_2, file_name):
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((50, 50))
-        self.image.fill(GREEN)
+        self.image = pg.Surface((size_1, size_2))
+        self.image = pg.image.load(file_name).convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.rect.center = (goto)
         self.direction = 1
         self.speed = 0
 
     def set_dir(self, new):
         self.direction = new
-
 #вправо-влево
     def GO_RL(self):
         self.rect.x += self.speed       
@@ -45,6 +48,8 @@ class Player(pg.sprite.Sprite):
         if self.rect.y < 0:
             self.rect.y = 600
 
+
+
     
 #----------------
         
@@ -52,23 +57,22 @@ pg.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 clock = pg.time.Clock()
 all_sprites = pg.sprite.Group()
-player = Player((WIDTH/2, HEIGHT/2))
+
+#ОБЬЕКТЫ
+player = Obj((WIDTH/2, HEIGHT/2), 30, 30, IMG_HERO)
+apple = Obj((rnd.randint(10, WIDTH), rnd.randint(10, HEIGHT)), WIDTH, HEIGHT, IMG_APPLE)
+
 all_sprites.add(player)
+all_sprites.add(apple)
+
+
 
 global_speed = 10
-
-bg_ = [rnd.randint(10, 20), (rnd.randint(20, 980), rnd.randint(20, 580)), rnd.randint(10, 60)]
-
-def background(num):
-    for _ in range(num[0]):
-        pg.draw.circle(screen, BLACK, num[1], num[2])
-
-    
+   
 # Бесконечный цикл
 while True:
     pg.time.delay(FPS)
     screen.fill(WHITE)
-    background(bg_)
     
     for i in pg.event.get():
         if i.type == pg.QUIT:
@@ -95,11 +99,14 @@ while True:
         player.speed = -global_speed
         player.GO_UD() 
 
-    player.go_out()   
-            
-            
+    player.go_out() 
+
+    #BLITS      
+    screen.blit(player.image, player.rect)     
     all_sprites.update()
     all_sprites.draw(screen)
     pg.display.flip()
     
     pg.display.update()
+
+pg.quit()
